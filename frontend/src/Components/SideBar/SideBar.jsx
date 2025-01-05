@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, Navigate } from "react-router-dom";
 import { House, Users, User, LogOut } from 'lucide-react';
 import "./SideBar.css";
 
-function SideBar({ onLogout }) {
-    
+function SideBar() {
+
     const [isExpanded, setIsExpanded] = useState(false);
     const location = useLocation();
 
@@ -15,7 +15,11 @@ function SideBar({ onLogout }) {
     };
 
     const logout = () => {
-        onLogout();
+        localStorage.removeItem('name');
+        localStorage.removeItem('token');
+        localStorage.removeItem('userStatus');
+
+        Navigate("/")
     };
 
     return (
@@ -33,7 +37,7 @@ function SideBar({ onLogout }) {
                     <li className="sidebar-item">
                         <Link
                             to="/customers"
-                            className={`sidebar-link ${isActive("/dashboard") ? "active" : ""}`}
+                            className={`sidebar-link ${isActive("/customers") ? "active" : ""}`}
                         >
                             <Users />
                             <span>Customers</span>
@@ -42,7 +46,7 @@ function SideBar({ onLogout }) {
                     <li className="sidebar-item">
                         <Link
                             to="/users"
-                            className={`sidebar-link ${isActive("/bookings") ? "active" : ""}`}
+                            className={`sidebar-link ${isActive("/users") ? "active" : ""}`}
                         >
                             <User />
                             <span>Users</span>

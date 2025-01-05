@@ -1,48 +1,98 @@
-import { useState } from "react";
-import Table from "../../Components/Table";
+import { useEffect, useState } from "react";
+import Table from "../../Components/Table/Table";
 import SideBar from "../../Components/SideBar/SideBar";
+import config from "../../../config";
+import ConfirmModal from "../../Components/ConfirmModal";
 
 function Customers() {
-    const [data, setData] = useState([
-        ["John Doe", "johndoe@example.com", "Admin"],
-        ["Jane Smith", "janesmith@example.com", "Editor"],
-        ["Mike Brown", "mikebrown@example.com", "Viewer"],
-    ]);
+    const [data, setData] = useState([]);
+    const [error, setError] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [selectedRowIndex, setSelectedRowIndex] = useState(null);
+    const Columns = ["#", "Name", "Email", "NIC", "Address", "Second Address", "Mobile Number", "Second Mobile Number", "WhatsApp", "Referrals", "Product Code", "Status"];
+    const btnName = 'New Customer'
 
-    const columns = ["Name", "Email", "Role"];
+    useEffect(() => {
+        fetchCustomerList();
+    })
 
-    const handleAdd = () => {
-        const newRow = ["New User", "newuser@example.com", "Role"];
-        setData([...data, newRow]);
+    const fetchCustomerList = async () => {
+        try {
+            const response = await fetch(`${config.BASE_URL}/customers`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch supplier payments list: ${response.status} ${response.statusText}`);
+            }
+            const cus = await response.json();
+            const formattedData = cus.map(cus => [
+                cus.cusId,
+                cus.cusName,
+                cus.cusEmail,
+                cus.cusNIC,
+                cus.cusAddress,
+                cus.cusSecondAddress,
+                cus.cusTP,
+                cus.cusSecondTP,
+                cus.cusWhatsapp,
+                cus.referral || cus.secondReferral,
+                cus.productCode,
+                cus.cusStatus,
+            ]);
+            setData(formattedData);
+        } catch (err) {
+            setError(err.message);
+        }
+    };
+    const handleDeleteRequest = (rowIndex) => {
+        setSelectedRowIndex(rowIndex);
+        setShowConfirmModal(true);
     };
 
-    const handleEdit = (row) => {
-        const updatedData = data.map((item) =>
-            item === row ? ["Edited User", "edited@example.com", "Updated Role"] : item
-        );
-        setData(updatedData);
-        alert(`Edited: ${row.join(", ")}`);
+    const confirmDelete = async () => {
+        try {
+            const cusId = data[selectedRowIndex][0];
+            const response = await fetch(`${config.BASE_URL}/customer/${cusId}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete customer');
+            }
+
+            setData(prevData => prevData.filter((_, index) => index !== selectedRowIndex));
+            fetchCustomerList();
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setShowConfirmModal(false);
+            setSelectedRowIndex(null);
+        }
     };
 
-    const handleDelete = (row) => {
-        const updatedData = data.filter((item) => item !== row);
-        setData(updatedData);
-        alert(`Deleted: ${row.join(", ")}`);
+    const closeConfirmModal = () => {
+        setShowConfirmModal(false);
+        setSelectedRowIndex(null);
     };
 
     return (
         <div className='d-flex'>
             <SideBar />
-            <div className="container mt-5">
-                <h2 className="text-center mb-4">Customers List</h2>
+            <div className="scrolling-container p-2">
+                <h2 className="text-center">Customers List</h2>
                 <Table
                     data={data}
-                    columns={columns}
-                    onAdd={handleAdd}
-                    btnName="Add Row"
-                    onEdit={handleEdit}
-                    onDelete={handleDelete}
+                    columns={Columns}
+                    btnName={btnName}
+                    showActions={true}
+                    showDate={false}
+                    onDelete={handleDeleteRequest}
                 />
+                {/* Confirm Modal */}
+                {showConfirmModal && (
+                    <ConfirmModal
+                        onConfirm={confirmDelete}
+                        onClose={closeConfirmModal}
+                    />
+                )}
             </div>
         </div>
     )
