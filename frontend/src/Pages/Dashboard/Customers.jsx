@@ -9,7 +9,7 @@ function Customers() {
     const [error, setError] = useState(null);
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [selectedRowIndex, setSelectedRowIndex] = useState(null);
-    const Columns = ["#", "Name", "Email", "NIC", "Address", "Second Address", "Mobile Number", "Second Mobile Number", "WhatsApp", "Referrals", "Product Code", "Status"];
+    const Columns = ["#", "Name", "Email", "NIC", "Address", "Second Address", "Mobile Number", "Second Mobile Number", "WhatsApp", "Referrals", "Second Referrals", "Product Code", "Status"];
     const btnName = 'New Customer'
 
     useEffect(() => {
@@ -32,8 +32,9 @@ function Customers() {
                 cus.cusSecondAddress,
                 cus.cusTP,
                 cus.cusSecondTP,
-                cus.cusWhatsapp,
-                cus.referral || cus.secondReferral,
+                cus.cusWhatsApp,
+                cus.referral,
+                cus.secondReferral,
                 cus.productCode,
                 cus.cusStatus,
             ]);
