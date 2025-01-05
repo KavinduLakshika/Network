@@ -26,6 +26,7 @@ app.get('/users', UserController.getAllUsers);
 app.get('/user/:id', UserController.getUserById);
 app.put('/user/:id', UserController.updateUser);
 app.delete('/user/:id', UserController.deleteUser);
+app.post("/userLogin", UserController.userLogin);
 
 // Sync the database
 sequelize

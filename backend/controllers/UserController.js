@@ -1,6 +1,8 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 
+const secretKey = process.env.SECRET_KEY;
 const saltRounds = 10;
 
 async function createUser(req, res) {
@@ -111,10 +113,85 @@ async function deleteUser(req, res) {
     }
 };
 
+async function userLogin(req, res) {
+    try {
+        const { userName, userPassword } = req.body;
+
+        // Check if both username and password are provided
+        if (!userName || !userPassword) {
+            return res.status(400).json({
+                message_type: "error",
+                message: "Username and password are required."
+            });
+        }
+
+        // Fetch user by username
+        const user = await User.findOne({ where: { userName } });
+
+        // If user not found, send error response
+        if (!user) {
+            return res.status(404).json({
+                message_type: "error",
+                message: "Incorrect username or password."
+            });
+        }
+
+        // Verify password
+        const passwordMatch = await bcrypt.compare(userPassword, user.userPassword);
+        if (!passwordMatch) {
+            return res.status(401).json({
+                message_type: "error",
+                message: "Incorrect username or password."
+            });
+        }
+
+        // Check if the user's account is inactive
+        if (user.user_status === "inactive") {
+            return res.status(403).json({
+                message_type: "error",
+                message: "Your account is inactive. Please contact an admin for further information."
+            });
+        }
+
+        // Generate JWT token if login is successful
+        const token = jwt.sign(
+            {
+                userId: user.id,
+                userName: user.userName,
+                userType: user.userType
+            },
+            secretKey,
+            { expiresIn: '6h' }
+        );
+
+        // Respond with success, token, and user details
+        return res.status(200).json({
+            message_type: "success",
+            message: "User signed in successfully.",
+            token,
+            user: {
+                id: user.id,
+                userName: user.userName,
+                userType: user.userType,
+                userStatus: user.userStatus
+            }
+        });
+
+    } catch (error) {
+        // Handle any errors
+        console.error("Error during login:", error);
+        return res.status(500).json({
+            message_type: "error",
+            message: `An error occurred: ${error.message}`
+        });
+    }
+}
+
 module.exports = {
     createUser,
     getAllUsers,
     getUserById,
     updateUser,
     deleteUser,
+    userLogin,
 };
