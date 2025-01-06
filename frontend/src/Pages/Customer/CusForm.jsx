@@ -153,7 +153,7 @@ function CusForm() {
 
                     <div className="modal-footer">
                         <button type="submit" className="btn btn-info">Save changes</button>
-                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        {/* <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button> */}
                     </div>
                 </div>
             </form>
