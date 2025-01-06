@@ -1,5 +1,5 @@
 import './App.css'
-import "bootswatch/dist/Slate/bootstrap.min.css"
+import "bootswatch/dist/lux/bootstrap.min.css"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import CusForm from './Pages/Customer/CusForm'
 import Login from './Pages/User/Login'
@@ -7,6 +7,7 @@ import UserForm from './Pages/User/UserForm';
 import Customers from './Pages/Dashboard/Customers';
 import Users from './Pages/Dashboard/Users';
 import { useEffect, useState } from 'react';
+import Successful from './Pages/Customer/Successful';
 
 function App() {
 
@@ -37,14 +38,12 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={token ? (<Navigate to={userStatus === "inActive" ? "/login" : "/customers"} replace />) : (<Login onLogin={handleLogin} />)} />
-        <Route path='/cus' element={<CusForm />} />
+        <Route path='/' element={<CusForm />} />
+        <Route path="/login" element={token ? (<Navigate to={userStatus === "inActive" ? "/login" : "/customers"} replace />) : (<Login onLogin={handleLogin} />)} />
         <Route path='/user' element={<UserForm />} />
-
         <Route path='/customers' element={<Customers />} />
         <Route path='/users' element={<Users />} />
-
-
+        <Route path='/successful' element={<Successful />} />
       </Routes>
     </BrowserRouter>
   )

@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import config from "../../../config";
 
 function CusForm() {
+    const navigate = useNavigate();
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
     const [formData, setFormData] = useState({
@@ -31,8 +33,6 @@ function CusForm() {
         if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email))
             errors.push("A valid email is required.");
         if (!formData.cusAddress1.trim()) errors.push("Address Line 1 is required.");
-        if (!formData.nic.trim() || !/^\d{10}(\d{2})?$/.test(formData.nic))
-            errors.push("NIC must be wrong.");
         if (!formData.mobileNum.trim() || !/^\d{10}$/.test(formData.mobileNum))
             errors.push("Mobile number must be 10 digits.");
         if (formData.mobileNum2 && !/^\d{10}$/.test(formData.mobileNum2))
@@ -76,6 +76,7 @@ function CusForm() {
             console.log('Customer created successfully:', data);
             setSuccessMessage("User Registered successfully.");
             setError(null);
+            navigate('/successful');
         } catch (error) {
             setError(error.message);
         }

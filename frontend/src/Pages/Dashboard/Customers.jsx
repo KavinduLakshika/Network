@@ -78,14 +78,17 @@ function Customers() {
         <div className='d-flex'>
             <SideBar />
             <div className="scrolling-container p-2">
-                <h2 className="text-center">Customers List</h2>
+                <h2 className="text-center mt-3">Customers List</h2>
+                {error && <div className="error-message">{error}</div>}
                 <Table
                     data={data}
                     columns={Columns}
                     btnName={btnName}
-                    showActions={true}
-                    showDate={false}
+                    showButton={false}
+                    showEdit={false}
                     onDelete={handleDeleteRequest}
+                    showDate={false}
+                    showPDF={false}
                 />
                 {/* Confirm Modal */}
                 {showConfirmModal && (
