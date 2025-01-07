@@ -1,9 +1,8 @@
 const User = require("../models/User");
-const bcrypt = require("bcrypt");
-const jwt = require('jsonwebtoken');
+const md5 = require("md5");
+const jwt = require("jsonwebtoken");
 
 const secretKey = process.env.SECRET_KEY;
-const saltRounds = 10;
 
 async function createUser(req, res) {
     try {
@@ -16,8 +15,8 @@ async function createUser(req, res) {
             });
         }
 
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(userPassword, saltRounds);
+        // Hash the password with MD5
+        const hashedPassword = md5(userPassword);
 
         // Create a new user
         const newUser = await User.create({
@@ -48,12 +47,12 @@ async function createUser(req, res) {
             .status(500)
             .json({ error: `An error occurred: ${error.message}` });
     }
-};
+}
 
 async function getAllUsers(req, res) {
     try {
-        const user = await User.findAll();
-        res.status(200).json(user);
+        const users = await User.findAll();
+        res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -70,7 +69,7 @@ async function getUserById(req, res) {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-};
+}
 
 async function updateUser(req, res) {
     try {
@@ -82,8 +81,8 @@ async function updateUser(req, res) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(userPassword, saltRounds);
+        // Hash the password with MD5
+        const hashedPassword = md5(userPassword);
 
         await user.update({
             userName,
@@ -93,11 +92,10 @@ async function updateUser(req, res) {
         });
 
         res.status(200).json(user);
-
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
-};
+}
 
 async function deleteUser(req, res) {
     try {
@@ -111,7 +109,7 @@ async function deleteUser(req, res) {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-};
+}
 
 async function userLogin(req, res) {
     try {
@@ -137,8 +135,8 @@ async function userLogin(req, res) {
         }
 
         // Verify password
-        const passwordMatch = await bcrypt.compare(userPassword, user.userPassword);
-        if (!passwordMatch) {
+        const hashedInputPassword = md5(userPassword);
+        if (hashedInputPassword !== user.userPassword) {
             return res.status(401).json({
                 message_type: "error",
                 message: "Incorrect username or password."
@@ -146,7 +144,7 @@ async function userLogin(req, res) {
         }
 
         // Check if the user's account is inactive
-        if (user.user_status === "inactive") {
+        if (user.userStatus === "Inactive") {
             return res.status(403).json({
                 message_type: "error",
                 message: "Your account is inactive. Please contact an admin for further information."
@@ -161,7 +159,7 @@ async function userLogin(req, res) {
                 userType: user.userType
             },
             secretKey,
-            { expiresIn: '6h' }
+            { expiresIn: "6h" }
         );
 
         // Respond with success, token, and user details
@@ -176,7 +174,6 @@ async function userLogin(req, res) {
                 userStatus: user.userStatus
             }
         });
-
     } catch (error) {
         // Handle any errors
         console.error("Error during login:", error);
